@@ -1,162 +1,1276 @@
-<!DOCTYPE html> <!--Define que el documento es HTML5-->
-<!--CRISTIAN PEREZ HERNANDEZ-->
-<html lang="es"> <!--Idioma en español-->
-    <head> <!--Metadatos como el conjunto de caracteres UTF-8 y configuracion de pantalla interactiva viewport-->
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>TECNM-Suma de Riemann</title><!--Titulo en la pestaña del navegador-->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        <link rel="stylesheet" href="styles.css"><!--Le dice al navegador que use styles.css para aplicar estilos-->
-        <script src="script.js"></script>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cristian Pérez — Técnico Electromecánico &amp; Automatización</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-void: #0a0c0e;
+    --bg-panel: #14171b;
+    --bg-panel-raised: #1b2025;
+    --ember: #ff5f1f;
+    --ember-soft: rgba(255,95,31,0.16);
+    --circuit: #2de3ff;
+    --circuit-soft: rgba(45,227,255,0.14);
+    --text-hi: #eef1f3;
+    --text-mid: #9aa4ab;
+    --text-low: #5b646b;
+    --line: #262c32;
+    --line-bright: #3a434b;
+    --radius: 2px;
+  }
 
-        <!--Libreria de matematicas MathJax-->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.1/math.min.js"></script>
+  *{margin:0;padding:0;box-sizing:border-box;}
 
+  html{scroll-behavior:smooth;}
 
-        <script type="text/javascript" async src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script type="text/javascript" async id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <link rel="icon" type="image/x-icon" href="https://www.tecnm.mx/images/tecnm_virtual/tecnm.png">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  html{background:var(--bg-void);}
 
-    </head>
-    <body><!--Contenido visible en la pagina-->
-        <header><!--Define la cabecera de la pagina, que en este caso contiene la barra de navegacion-->
-            <nav><!--Representa un menu de navegacion dentro del header con el proposito de agrupar enlaces-->
-                <div class="TECNMLOGO" id="Inicio">
-                <img src="TECNM.png" alt="TECNM">
-                </div>
-                <ul><!--(Lista desornedada) para listar los elementos del menu-->
-                    <li><a href="#calc">Inicio</a></li><!--(list item)Representa un elemento dentro de cada menu de
-                    navegacion, <a>(anchor, crea enlaces)-->
-                    <li><a href="#ppls">Acerca de</a></li>
-                    <li><a href="#defi">Definicion</a></li>
-                    <li><a href="#historia">Historia</a></li>
-                </ul>
-            </nav>
-        </header>
+  body{
+    color:var(--text-hi);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    line-height:1.6;
+  }
 
-        <main><!--Es el contenido principal de la pagina-->
-            <h1 id="calc">Suma de Riemann</h1><!--Titulo grande-->
-            <p>INSTRUCCIONES: <br>
-            INGRESA EN "a" y "b" EL INTERVALO DE LA FUNCION EN EL CUAL SE REALIZARA LA CUENTA,
-            "a" DEBE SER MENOR QUE "b". <br> EN "n" DEBES PONER EL NUMERO DE SUBINTERVALOS A REALIZAR <br>
-            EN METODO, ESCRIBE "centro, izquierda O derecha".</p><!--parrafo de texto-->
-            
-            <section class="calculator">
-                <h2>Calculadora</h2>
-                <div class="calculator-container">
-            
-                    <div class="calc-space">
-                        <!--<nav class="mets">
-                            <ul>
-                                <li class="dropdown">
-                                    <a href="#">Método</a>
-                                    <ul class="dropdown-content">
-                                        <li><a href="#">1</a></li>
-                                        <li><a href="#">2</a></li>
-                                        <li><a href="#">3</a></li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </nav>-->
-                    
-                        <form id="calcForm">
-                        <label for="metmat">Metodo:</label>
-                        <input type="text" id="metmat" required><!--Metodo-->
+  /* ---------- ambient 3D circuit background (site-wide, subtle) ---------- */
+  .bg-base{
+    position:fixed;
+    inset:0;
+    z-index:-2;
+    background:var(--bg-void);
+  }
+  .circuit-bg-3d{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    overflow:hidden;
+    perspective:1200px;
+    pointer-events:none;
+  }
+  .circuit-plane{
+    position:absolute;
+    inset:-15%;
+    width:130%;
+    height:130%;
+  }
+  .circuit-plane.plane-1{
+    opacity:0.05;
+    animation:drift1 46s ease-in-out infinite;
+  }
+  .circuit-plane.plane-2{
+    opacity:0.035;
+    transform:translateZ(-220px) scale(1.3);
+    animation:drift2 62s ease-in-out infinite reverse;
+  }
+  @keyframes drift1{
+    0%,100%{transform:rotateX(4deg) rotateY(-4deg) translateZ(-90px);}
+    50%{transform:rotateX(-3deg) rotateY(4deg) translateZ(-60px);}
+  }
+  @keyframes drift2{
+    0%,100%{transform:rotateX(-2deg) rotateY(3deg) translateZ(-220px) scale(1.3);}
+    50%{transform:rotateX(3deg) rotateY(-2deg) translateZ(-200px) scale(1.32);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .circuit-plane{animation:none !important;}
+  }
 
-                        <label for="num1">a:</label>
-                        <input type="number" id="num1" required><!--Ingreso del dato 1-->
+  h1,h2,h3,.display{
+    font-family:'Chakra Petch',sans-serif;
+    letter-spacing:0.01em;
+  }
 
-                        <label for="num2">b:</label>
-                        <input type="number" id="num2" required><!--Ingreso del dato 2-->
+  .mono{
+    font-family:'JetBrains Mono',monospace;
+  }
 
-                        <label for="num3" >n:</label>
-                        <input type="number" id="num3" min="1" step="1" required><!--Ingreso del dato 3-->
+  a{color:inherit;text-decoration:none;}
 
-                        <button type="submit">Area</button><!--Boton-->
-                       
-                        <h3>Resultado: <span id="result">-</span></h3>
-                    </div>  
-                    
-                    <div class="graphic-space">
-                        <canvas id="grafica" ></canvas>
-                        <label for="Funcion" >Funcion:</label>
-                        <input type="numer" id="inputFuntion" value="2x*x+2" required><!--Ingreso del dato 3-->
-                        <p id="outputEcuacion">Tu ecuación aparecerá aquí: \( 2x*x+2 \)</p> 
+  ::selection{background:var(--ember);color:var(--bg-void);}
 
-                    </div>
-            </section></form>
+  /* subtle blueprint grid used behind non-hero sections */
+  .blueprint{
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: -1px -1px;
+    opacity:0.35;
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
 
-            <section class="hero" id="defi">
-                <img src="https://calculadorasonline.com/wp-content/uploads/2021/04/Suma-de-Riemann-por-la-derecha.jpg" alt="Imagen de ejemplo">
-                <h2>Definicion</h2>
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 6vw;
+    background:rgba(10,12,14,0.72);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
 
-                <p>La <strong>suma de Riemann</strong> es un método matemático para <b>aproximar el área bajo una curva </b>en un intervalo determinado. Se usa como base para definir la <b>integral definida</b> en cálculo. </p>
-                <p>
-                    ¿Cómo funciona?  <br>
-                    1. Se divide el intervalo \([a, b]\) en pequeños subintervalos de ancho \(\Delta x\).  <br>
-                    2. Se elige un punto dentro de cada subintervalo (puede ser el izquierdo, derecho o el centro).  <br>
-                    3. Se evalúa la función en esos puntos para obtener la altura de pequeños rectángulos.  <br>
-                    4. Se suman las áreas de todos los rectángulos <i>(base x altura)</i>.  <br> 
-                    Matemáticamente, la suma de Riemann se expresa como:  <br>
-                    <p>
-                    S = \(\sum_{i=1}^{n} f(x)\Delta x\) <br> <!--Expresion matematica usando la libreria MathJax-->
-                    donde \( f(x_i) \) es la altura del rectángulo y \( \Delta x \) es su base.</p>
-                    
-                    
-                <p>¿Para qué sirve? <br> 
-                - Se usa en física, economía e ingeniería para calcular áreas, volúmenes y otros valores acumulados.  <br>
-                - Si reducimos el ancho de los rectángulos (\(\Delta x \to 0\)), la suma de Riemann se convierte en una <b>integral definida</b>, dando el área exacta bajo la curva. <br>
-                En resumen, la suma de Riemann es una forma de <b>sumar muchas áreas pequeñas</b> para estimar una más grande, lo que nos lleva al concepto de integración.</p>
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
 
+  .chip{
+    width:34px;height:34px;
+    perspective:400px;
+  }
+  .chip-face{
+    width:100%;height:100%;
+    border:1.5px solid var(--circuit);
+    border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    color:var(--circuit);
+    background:linear-gradient(135deg, rgba(45,227,255,0.08), transparent);
+    transition:transform 0.6s cubic-bezier(.2,.8,.2,1), box-shadow 0.6s;
+    transform-style:preserve-3d;
+  }
+  .chip:hover .chip-face{
+    transform:rotateY(180deg) rotateX(10deg);
+    box-shadow:0 0 22px var(--circuit-soft);
+  }
 
-            <section class="historia">
-                <h2 id="historia">Historia de la Suma de Riemann</h2>
-                <p>La <strong>suma de Riemann</strong> es un método desarrollado por <strong>Bernhard Riemann</strong> en 1854 
-                para aproximar el área bajo una curva mediante la suma de áreas de rectángulos. Su importancia radica en que 
-                sentó las bases del <em>cálculo integral moderno</em>.</p>
+  .brand-name{
+    font-family:'Chakra Petch',sans-serif;
+    font-size:14px;
+    letter-spacing:0.14em;
+    color:var(--text-mid);
+    text-transform:uppercase;
+  }
 
-                <h3>Antecedentes Históricos</h3>
-                <ul>
-                    <li><strong>Antigua Grecia:</strong> <em>Eudoxo</em> utilizó el método de exhaución para medir áreas.</li>
-                    <li><strong>Siglo XVII:</strong> <em>Isaac Newton</em> y <em>Gottfried Leibniz</em> formalizaron el cálculo integral.</li>
-                    <li><strong>Siglo XIX:</strong> <em>Augustin-Louis Cauchy</em> definió con mayor precisión los conceptos de límites y continuidad.</li>
-                    <li><strong>1854:</strong> <em>Bernhard Riemann</em> introdujo la <strong>definición formal de la integral</strong> basada en 
-                    sumas de rectángulos, conocidas hoy como <strong>sumas de Riemann</strong>.</li>
-                </ul>
+  .nav-links{
+    display:flex;
+    gap:34px;
+    list-style:none;
+  }
+  .nav-links a{
+    font-size:13px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--text-mid);
+    position:relative;
+    padding-bottom:4px;
+    transition:color 0.25s;
+  }
+  .nav-links a::after{
+    content:'';
+    position:absolute;
+    left:0;bottom:0;
+    width:0%;height:1px;
+    background:var(--ember);
+    transition:width 0.3s;
+  }
+  .nav-links a:hover,
+  .nav-links a.active{color:var(--text-hi);}
+  .nav-links a:hover::after,
+  .nav-links a.active::after{width:100%;}
 
-                <p>Este concepto es clave en el desarrollo del <strong>cálculo y análisis matemático</strong>, permitiendo la 
-                formulación rigurosa de la integral definida.</p>    
-            </section>
+  .nav-cta{
+    font-size:12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    border:1px solid var(--line-bright);
+    padding:9px 18px;
+    border-radius:2px;
+    transition:border-color 0.25s, color 0.25s, box-shadow 0.25s;
+  }
+  .nav-cta:hover{
+    border-color:var(--ember);
+    color:var(--ember);
+    box-shadow:0 0 16px var(--ember-soft);
+  }
 
+  .nav-toggle{display:none;}
 
-                <a href="https://www.redalyc.org/journal/6079/607968030005/607968030005.pdf" class="button">Mas informacion</a>
-            </section>
-            <section class="people"><!--Creditos de los desarroladores-->
-                <h2 id="ppls">Quienes somos</h2>
-                <div class="people-container"><!--Contenedor de los creditos-->
-                    <div class="ppl">
-                        <img src="cris.jpg" alt="cris">
-                        <h3>Cristian</h3>
-                        <p>Encargado del Front-End, tecnico electromecanico y estudiante de Ingenieria en Inteligencia Artificial.</p>
-                    </div>
-                    <div class="ppl">
-                        <img src="hanna.jpg" alt="hanna">
-                        <h3>Hanna</h3>
-                        <p>Encargada del backend, tecnico en programacion, estudiante de Ingenieria en AI.</p>
-                    </div>
-                </div>
-            </section>
-        
-        </main>
-        
-        <button id="floating-button">
-            <a href="#Inicio">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house" viewBox="0 1.1 16 16">
-                <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
-              </svg>
-            </a>
-        </button>
-        
-    </body>
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    min-height:100svh;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    padding:0 6vw;
+  }
+  #spark-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;height:100%;
+    z-index:1;
+  }
+  .hero::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:radial-gradient(ellipse at 30% 30%, rgba(255,95,31,0.08), transparent 55%),
+               radial-gradient(ellipse at 75% 70%, rgba(45,227,255,0.07), transparent 55%);
+    z-index:0;
+  }
+
+  .hero-content{
+    position:relative;
+    z-index:2;
+    max-width:760px;
+    padding-top:80px;
+  }
+
+  /* ---------- profile photo (edit the <img src> in the HTML) ---------- */
+  .hero-photo-frame{
+    position:relative;
+    width:104px;
+    height:104px;
+    margin-bottom:28px;
+    opacity:0;
+    animation:rise 0.8s 0.05s forwards;
+    perspective:600px;
+  }
+  .hero-photo-frame::before{
+    content:'';
+    position:absolute;
+    inset:-4px;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, var(--ember), var(--circuit), var(--ember));
+    animation:ring-spin 16s linear infinite;
+  }
+  .hero-photo{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    overflow:hidden;
+    background:var(--bg-panel);
+    z-index:1;
+    transform-style:preserve-3d;
+    transition:transform 0.15s ease-out;
+    will-change:transform;
+  }
+  .hero-photo-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .hero-photo-fallback{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Chakra Petch',sans-serif;
+    font-size:26px;
+    font-weight:600;
+    color:var(--text-mid);
+    background:linear-gradient(160deg, var(--bg-panel), var(--bg-panel-raised));
+  }
+  @keyframes ring-spin{ to{ transform:rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){
+    .hero-photo-frame::before{animation:none;}
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.16em;
+    color:var(--circuit);
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+    opacity:0;
+    animation:rise 0.8s 0.15s forwards;
+  }
+  .eyebrow::before{
+    content:'';
+    width:26px;height:1px;
+    background:var(--circuit);
+  }
+
+  .hero h1{
+    font-size:clamp(48px, 8.5vw, 108px);
+    line-height:0.96;
+    font-weight:700;
+    text-transform:uppercase;
+    background:linear-gradient(180deg, #ffffff 0%, #c7ccd1 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    opacity:0;
+    animation:rise 0.9s 0.3s forwards;
+  }
+
+  .hero-role{
+    margin-top:18px;
+    font-size:clamp(15px, 2vw, 19px);
+    color:var(--text-mid);
+    font-weight:500;
+    max-width:560px;
+    opacity:0;
+    animation:rise 0.9s 0.5s forwards;
+  }
+  .hero-role strong{color:var(--text-hi);font-weight:600;}
+
+  .hero-tagline{
+    margin-top:22px;
+    font-size:15px;
+    color:var(--text-mid);
+    max-width:520px;
+    opacity:0;
+    animation:rise 0.9s 0.65s forwards;
+  }
+
+  .hero-cta{
+    margin-top:38px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    opacity:0;
+    animation:rise 0.9s 0.8s forwards;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 26px;
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-weight:600;
+    border-radius:2px;
+    cursor:pointer;
+    transition:transform 0.25s, box-shadow 0.25s, background 0.25s, color 0.25s;
+  }
+  .btn-primary{
+    background:var(--ember);
+    color:#150900;
+    border:1px solid var(--ember);
+  }
+  .btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 30px -8px rgba(255,95,31,0.55);
+  }
+  .btn-ghost{
+    border:1px solid var(--line-bright);
+    color:var(--text-hi);
+    background:transparent;
+  }
+  .btn-ghost:hover{
+    border-color:var(--circuit);
+    color:var(--circuit);
+    box-shadow:0 0 20px var(--circuit-soft);
+    transform:translateY(-2px);
+  }
+
+  .scroll-cue{
+    position:absolute;
+    bottom:36px;left:6vw;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    color:var(--text-low);
+    text-transform:uppercase;
+  }
+  .scroll-cue .line{
+    width:1px;height:34px;
+    background:linear-gradient(var(--text-low), transparent);
+    animation:pulse-line 2s ease-in-out infinite;
+  }
+
+  @keyframes rise{
+    from{opacity:0; transform:translateY(22px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes pulse-line{
+    0%,100%{opacity:0.3;}
+    50%{opacity:1;}
+  }
+
+  /* ---------- SECTION shell ---------- */
+  section{
+    position:relative;
+    padding:120px 6vw;
+    border-top:1px solid var(--line);
+  }
+  .section-inner{position:relative;z-index:1;}
+
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    margin-bottom:56px;
+  }
+  .section-num{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--ember);
+    font-size:13px;
+  }
+  .section-head h2{
+    font-size:clamp(28px, 3.4vw, 42px);
+    text-transform:uppercase;
+    font-weight:600;
+  }
+  .section-head .rule{
+    flex:1;
+    height:1px;
+    background:var(--line);
+  }
+
+  .reveal{
+    opacity:0;
+    transform:translateY(32px);
+    transition:opacity 0.8s cubic-bezier(.2,.7,.2,1), transform 0.8s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.is-visible{opacity:1;transform:translateY(0);}
+
+  /* ---------- SOBRE MI ---------- */
+  .about-grid{
+    display:grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap:60px;
+    align-items:start;
+  }
+  .stat-list{
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+  }
+  .stat{
+    border-left:2px solid var(--line-bright);
+    padding-left:18px;
+  }
+  .stat-value{
+    font-family:'Chakra Petch',sans-serif;
+    font-size:26px;
+    color:var(--circuit);
+    font-weight:600;
+  }
+  .stat-label{
+    font-size:12.5px;
+    color:var(--text-mid);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-top:2px;
+  }
+  .about-text p{
+    font-size:16.5px;
+    color:var(--text-mid);
+    margin-bottom:20px;
+    max-width:56ch;
+  }
+  .about-text p strong{color:var(--text-hi);}
+
+  /* ---------- EXPERIENCIA timeline ---------- */
+  .timeline{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .tl-item{
+    display:grid;
+    grid-template-columns: 64px 1fr;
+    gap:28px;
+    padding:34px 0;
+    border-bottom:1px solid var(--line);
+    perspective:900px;
+  }
+  .tl-item:last-child{border-bottom:none;}
+  .tl-index{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--text-low);
+    padding-top:4px;
+  }
+  .tl-card{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:28px 30px;
+    transform-style:preserve-3d;
+    transition:transform 0.15s ease-out, border-color 0.3s, box-shadow 0.3s;
+    will-change:transform;
+  }
+  .tl-card:hover{
+    border-color:var(--line-bright);
+    box-shadow:0 24px 50px -20px rgba(0,0,0,0.6);
+  }
+  .tl-tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ember);
+    display:inline-block;
+    margin-bottom:10px;
+  }
+  .tl-card h3{
+    font-size:20px;
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  .tl-card p{
+    color:var(--text-mid);
+    font-size:15px;
+    max-width:62ch;
+  }
+
+  /* ---------- HABILIDADES ---------- */
+  .skills-groups{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:40px;
+  }
+  .skill-group h3{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--circuit);
+    margin-bottom:22px;
+  }
+  .skill-cards{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:14px;
+  }
+  .skill-card{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    transform-style:preserve-3d;
+    transition:transform 0.15s ease-out, border-color 0.3s;
+    will-change:transform;
+  }
+  .skill-card:hover{border-color:var(--line-bright);}
+  .skill-card svg{
+    width:22px;height:22px;
+    stroke:var(--ember);
+    margin-bottom:14px;
+  }
+  .skill-group:nth-child(2) .skill-card svg{stroke:var(--circuit);}
+  .skill-card .name{
+    font-size:14.5px;
+    font-weight:600;
+  }
+  .skill-card .sub{
+    font-size:12px;
+    color:var(--text-low);
+    margin-top:4px;
+  }
+
+  /* ---------- EDUCACION ---------- */
+  .edu-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  .edu-card{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:32px;
+    position:relative;
+    overflow:hidden;
+  }
+  .edu-card::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;
+    width:100%;height:3px;
+    background:linear-gradient(90deg, var(--ember), var(--circuit));
+  }
+  .edu-year{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--text-low);
+    margin-bottom:14px;
+  }
+  .edu-card h3{font-size:19px;margin-bottom:8px;font-weight:600;}
+  .edu-card p{color:var(--text-mid);font-size:14.5px;}
+
+  /* ---------- CERTIFICACIONES ---------- */
+  .cert-row{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+  }
+  .cert-card{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px;
+    background:linear-gradient(160deg, var(--bg-panel), var(--bg-panel-raised));
+  }
+  .cert-card .badge{
+    width:38px;height:38px;
+    border:1px solid var(--circuit);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;
+    color:var(--circuit);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+  }
+  .cert-card h3{font-size:15.5px;margin-bottom:6px;font-weight:600;}
+  .cert-card p{font-size:13px;color:var(--text-mid);}
+
+  /* ---------- CONTACTO ---------- */
+  .contact-section{
+    text-align:left;
+    background:radial-gradient(ellipse at 20% 20%, rgba(255,95,31,0.06), transparent 60%),
+               radial-gradient(ellipse at 80% 80%, rgba(45,227,255,0.06), transparent 60%);
+  }
+  .contact-head h2{
+    font-size:clamp(30px, 5vw, 58px);
+    max-width:14ch;
+    line-height:1.05;
+    text-transform:none;
+    margin-bottom:22px;
+  }
+  .contact-head p{
+    color:var(--text-mid);
+    max-width:52ch;
+    font-size:16px;
+    margin-bottom:44px;
+  }
+  .contact-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:18px;
+    margin-bottom:44px;
+  }
+  .contact-card{
+    border:1px solid var(--line);
+    padding:22px 20px;
+    border-radius:var(--radius);
+    transition:border-color 0.25s, transform 0.25s;
+  }
+  .contact-card:hover{
+    border-color:var(--ember);
+    transform:translateY(-3px);
+  }
+  .contact-card svg{
+    width:18px;height:18px;
+    stroke:var(--text-mid);
+    margin-bottom:12px;
+  }
+  .contact-card .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--text-low);
+    margin-bottom:6px;
+  }
+  .contact-card .value{
+    font-size:14px;
+    font-weight:600;
+    word-break:break-word;
+  }
+
+  footer{
+    padding:30px 6vw;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-top:1px solid var(--line);
+    font-size:12px;
+    color:var(--text-low);
+    font-family:'JetBrains Mono',monospace;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    .eyebrow,.hero h1,.hero-role,.hero-tagline,.hero-cta{animation:none;opacity:1;}
+    .reveal{opacity:1;transform:none;transition:none;}
+    .chip-face{transition:none;}
+  }
+
+  @media (max-width:900px){
+    .nav-links{display:none;}
+    .about-grid,.skills-groups,.edu-grid{grid-template-columns:1fr;}
+    .skill-cards{grid-template-columns:repeat(2,1fr);}
+    .cert-row{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:520px){
+    .skill-cards{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr;}
+    .tl-item{grid-template-columns:1fr;}
+    section{padding:90px 6vw;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-base" aria-hidden="true"></div>
+<div class="circuit-bg-3d" aria-hidden="true">
+  <svg class="circuit-plane plane-1" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <pattern id="circuit1" width="80" height="80" patternUnits="userSpaceOnUse">
+        <path d="M0 40h30M50 40h30M40 0v30M40 50v30" stroke="#2de3ff" stroke-width="1" fill="none"/>
+        <path d="M0 10h15M65 10h15M0 70h20M60 70h20" stroke="#2de3ff" stroke-width="1" fill="none"/>
+        <circle cx="40" cy="40" r="3" fill="none" stroke="#2de3ff" stroke-width="1"/>
+        <circle cx="15" cy="10" r="1.6" fill="#2de3ff"/>
+        <circle cx="65" cy="10" r="1.6" fill="#2de3ff"/>
+        <circle cx="20" cy="70" r="1.6" fill="#ff5f1f"/>
+        <circle cx="60" cy="70" r="1.6" fill="#ff5f1f"/>
+      </pattern>
+    </defs>
+    <rect width="400" height="400" fill="url(#circuit1)"/>
+  </svg>
+  <svg class="circuit-plane plane-2" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <pattern id="circuit2" width="120" height="120" patternUnits="userSpaceOnUse">
+        <path d="M0 60h45M75 60h45M60 0v45M60 75v45" stroke="#ff5f1f" stroke-width="1" fill="none"/>
+        <path d="M0 15h25M95 15h25M0 105h30M90 105h30" stroke="#2de3ff" stroke-width="1" fill="none"/>
+        <circle cx="60" cy="60" r="4" fill="none" stroke="#ff5f1f" stroke-width="1"/>
+        <circle cx="25" cy="15" r="2" fill="#2de3ff"/>
+        <circle cx="95" cy="15" r="2" fill="#2de3ff"/>
+      </pattern>
+    </defs>
+    <rect width="400" height="400" fill="url(#circuit2)"/>
+  </svg>
+</div>
+
+<nav>
+  <div class="brand">
+    <div class="chip"><div class="chip-face">CP</div></div>
+    <span class="brand-name">Cristian Pérez</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#sobre-mi" data-nav>Sobre mí</a></li>
+    <li><a href="#experiencia" data-nav>Experiencia</a></li>
+    <li><a href="#habilidades" data-nav>Habilidades</a></li>
+    <li><a href="#educacion" data-nav>Educación</a></li>
+    <li><a href="#contacto" data-nav>Contacto</a></li>
+  </ul>
+  <a href="#contacto" class="nav-cta">Contactar</a>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero" id="hero">
+  <canvas id="spark-canvas"></canvas>
+  <div class="hero-content">
+    <!-- FOTO DE PERFIL: reemplaza el "src" de abajo por la ruta o URL de tu foto (ej. src="foto.jpg"). Si no hay foto, se muestra automáticamente el marcador "CP". -->
+    <div class="hero-photo-frame tilt-photo">
+      <div class="hero-photo">
+        <img class="hero-photo-img" src="photo.jpeg" alt="Foto de perfil de Cristian Pérez" >
+
+      </div>
+    </div>
+    <div class="eyebrow">Técnico electromecánico · Ingeniería en IA</div>
+    <h1>Cristian<br>Pérez</h1>
+    <p class="hero-role">De la <strong>soldadura</strong> al <strong>microcontrolador</strong>: construyo la estructura y el sistema que la controla.</p>
+    <p class="hero-tagline">Combino trabajo de taller —soldadura, estructuras metálicas, mantenimiento industrial— con desarrollo de software y automatización basada en microcontroladores, PLC y sensores. Un mismo proyecto, de principio a fin.</p>
+    <div class="hero-cta">
+      <a href="#experiencia" class="btn btn-primary">Ver experiencia</a>
+      <a href="#contacto" class="btn btn-ghost">Hablemos</a>
+    </div>
+  </div>
+  <div class="scroll-cue"><span class="line"></span>Scroll</div>
+</header>
+
+<!-- ===================== SOBRE MI ===================== -->
+<section id="sobre-mi">
+  <div class="blueprint"></div>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-num">01</span>
+      <h2>Sobre mí</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="about-grid">
+      <div class="stat-list reveal">
+        <div class="stat">
+          <div class="stat-value">6013 · 3/32"</div>
+          <div class="stat-label">Electrodo — soldadura estructural</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">0.8–1mm</div>
+          <div class="stat-label">Fluxcore — soldadura de precisión</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">ESP32 · PLC</div>
+          <div class="stat-label">Control y automatización</div>
+        </div>
+      </div>
+      <div class="about-text reveal">
+        <p>Mi enfoque se centra en la creación de <strong>soluciones eficientes y escalables</strong>, utilizando las últimas tecnologías y mejores prácticas de desarrollo — sin perder de vista que todo sistema automatizado empieza con una estructura física bien construida.</p>
+        <p>Vengo del taller: corté, soldé y armé estructuras antes de programar el sistema que las controla. Esa doble base —<strong>manufactura y software</strong>— es lo que aplico hoy a proyectos de telemetría, control de procesos y mantenimiento industrial.</p>
+        <p>Actualmente curso <strong>Ingeniería en Inteligencia Artificial</strong> en el Tecnológico Nacional de México, campus Apizaco, después de formarme como <strong>Técnico Electromecánico Industrial</strong>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EXPERIENCIA ===================== -->
+<section id="experiencia">
+  <div class="blueprint"></div>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-num">02</span>
+      <h2>Experiencia</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="timeline">
+      <div class="tl-item reveal">
+        <div class="tl-index">01</div>
+        <div class="tl-card tilt">
+          <span class="tl-tag">Automatización · Software</span>
+          <h3>Telemetría de sensores con ESP32 y Flask</h3>
+          <p>Elaboración de aplicaciones web para telemetría de sensores, automatización y organización de datos, integrando HTML, Python (Flask) y microcontroladores ESP32.</p>
+        </div>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-index">02</div>
+        <div class="tl-card tilt">
+          <span class="tl-tag">Automatización · Control</span>
+          <h3>Embotelladora automática de agua</h3>
+          <p>Diseño y construcción de una embotelladora simple mediante programación de PLC, motorreductores DC y actuadores neumáticos — de la mecánica al control.</p>
+        </div>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-index">03</div>
+        <div class="tl-card tilt">
+          <span class="tl-tag">Taller · Herrería</span>
+          <h3>Herrería comercial y residencial</h3>
+          <p>Fabricación de estructuras con soldadura de electrodo 6013 3/32" y fluxcore 0.8–1mm, para proyectos comerciales y residenciales.</p>
+        </div>
+      </div>
+      <div class="tl-item reveal">
+        <div class="tl-index">04</div>
+        <div class="tl-card tilt">
+          <span class="tl-tag">Industria · Mantenimiento</span>
+          <h3>Equipo de mantenimiento — Kimberly-Clark</h3>
+          <p>Parte del equipo de mantenimiento industrial, dando soporte a procesos productivos en planta.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HABILIDADES ===================== -->
+<section id="habilidades">
+  <div class="blueprint"></div>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-num">03</span>
+      <h2>Habilidades</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="skills-groups">
+      <div class="skill-group reveal">
+        <h3>Automatización &amp; Código</h3>
+        <div class="skill-cards">
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="6" y="6" width="12" height="12" rx="1"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+            <div class="name">C++ para microcontroladores</div>
+            <div class="sub">Circuitos y control embebido</div>
+          </div>
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2v20M2 12h20" stroke-dasharray="1 3"/><circle cx="12" cy="12" r="9"/></svg>
+            <div class="name">Python · Flask</div>
+            <div class="sub">Nivel intermedio</div>
+          </div>
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 4l1.5 16L12 22l6.5-2L20 4H4z"/><path d="M8 8h8M9 12h6M9.5 16h5"/></svg>
+            <div class="name">HTML &amp; apps web</div>
+            <div class="sub">Interfaces de telemetría</div>
+          </div>
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/><path d="M6 8v8M18 8v8M8 6h8M8 18h8"/></svg>
+            <div class="name">Diseño de circuitos</div>
+            <div class="sub">Electrónica aplicada</div>
+          </div>
+        </div>
+      </div>
+      <div class="skill-group reveal">
+        <h3>Diseño &amp; Taller</h3>
+        <div class="skill-cards">
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 21l7-7M14 3l7 7-9 9-4-4z"/></svg>
+            <div class="name">Soldadura 6013 / Fluxcore</div>
+            <div class="sub">Estructuras metálicas</div>
+          </div>
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="4" width="18" height="14" rx="1"/><path d="M3 9h18M8 4v14"/></svg>
+            <div class="name">AutoCAD</div>
+            <div class="sub">Básico</div>
+          </div>
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 2l8 4.5v9L12 20l-8-4.5v-9L12 2z"/><path d="M12 2v18M4 6.5l8 4.5 8-4.5"/></svg>
+            <div class="name">Fusion 360</div>
+            <div class="sub">Básico</div>
+          </div>
+          <div class="skill-card tilt">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 8h16M9 3v18"/></svg>
+            <div class="name">Excel</div>
+            <div class="sub">Organización de datos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EDUCACION ===================== -->
+<section id="educacion">
+  <div class="blueprint"></div>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-num">04</span>
+      <h2>Educación</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="edu-grid">
+      <div class="edu-card reveal">
+        <div class="edu-year">2024 — Actual</div>
+        <h3>Ingeniería en Inteligencia Artificial</h3>
+        <p>Tecnológico Nacional de México — Campus Apizaco</p>
+      </div>
+      <div class="edu-card reveal">
+        <div class="edu-year">2021 — 2024</div>
+        <h3>Técnico Electromecánico Industrial</h3>
+        <p>Colegio Nacional de Educación Profesional Técnica — 056 Amaxac</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CERTIFICACIONES ===================== -->
+<section id="certificaciones">
+  <div class="blueprint"></div>
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <span class="section-num">05</span>
+      <h2>Certificaciones</h2>
+      <span class="rule"></span>
+    </div>
+    <div class="cert-row">
+      <div class="cert-card reveal">
+        <div class="badge">IA</div>
+        <h3>Analítica de datos, IA y habilidades esenciales</h3>
+        <p>IBM — Cursando</p>
+      </div>
+      <div class="cert-card reveal">
+        <div class="badge">B1</div>
+        <h3>Inglés B1</h3>
+        <p>TOEFL ITP — Score 447 · 2026</p>
+      </div>
+      <div class="cert-card reveal">
+        <div class="badge">EV</div>
+        <h3>Procedimientos básicos de movilidad en vehículos eléctricos</h3>
+        <p>PLM del Norte SA de CV — 2024</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTACTO ===================== -->
+<section id="contacto" class="contact-section">
+  <div class="blueprint"></div>
+  <div class="section-inner">
+    <div class="contact-head reveal">
+      <h2>¿Construimos algo juntos?</h2>
+      <p>Disponible para incorporarme a proyectos de herrería y automatización industrial. Del corte y la soldadura al microcontrolador que lo controla.</p>
+    </div>
+    <div class="contact-grid reveal">
+      <a class="contact-card" href="tel:2411183302">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .6 3a2 2 0 0 1-.5 2L8 10a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2-.5c1 .3 2 .5 3 .6a2 2 0 0 1 1.7 2z"/></svg>
+        <div class="label">Teléfono</div>
+        <div class="value">241 118 3302</div>
+      </a>
+      <a class="contact-card" href="mailto:crisper1821@gmail.com">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 6l10 7 10-7"/></svg>
+        <div class="label">Email</div>
+        <div class="value">crisper1821@gmail.com</div>
+      </a>
+      <a class="contact-card" href="https://github.com/CrisAkm" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+        <div class="label">Portafolio</div>
+        <div class="value">github.com/CrisAkm</div>
+      </a>
+      <a class="contact-card" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 22s7-7.5 7-12.5A7 7 0 0 0 5 9.5C5 14.5 12 22 12 22z"/><circle cx="12" cy="9.5" r="2.4"/></svg>
+        <div class="label">Ubicación</div>
+        <div class="value">San Miguel Contla, Tlaxcala</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Cristian Pérez</span>
+  <span>Diseñado para automatización industrial</span>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- NAV active state ---------- */
+  var navLinks = document.querySelectorAll('[data-nav]');
+  var sections = document.querySelectorAll('section');
+  var navObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        var id = entry.target.id;
+        navLinks.forEach(function(l){
+          l.classList.toggle('active', l.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px' });
+  sections.forEach(function(s){ navObserver.observe(s); });
+
+  /* ---------- Scroll reveal ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if(reduceMotion){
+    revealEls.forEach(function(el){ el.classList.add('is-visible'); });
+  } else {
+    var revealObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach(function(el){ revealObserver.observe(el); });
+  }
+
+  /* ---------- 3D tilt on cards & photo (fine-pointer devices only: skip on touch/mobile) ---------- */
+  var hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if(!reduceMotion && hasFinePointer){
+    document.querySelectorAll('.tilt').forEach(function(card){
+      card.style.transformStyle = 'preserve-3d';
+      var rect;
+      card.addEventListener('mousemove', function(e){
+        rect = card.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width;
+        var py = (e.clientY - rect.top) / rect.height;
+        var rx = (py - 0.5) * -8;
+        var ry = (px - 0.5) * 10;
+        card.style.transform = 'perspective(900px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateZ(4px)';
+      });
+      card.addEventListener('mouseleave', function(){
+        card.style.transform = 'perspective(900px) rotateX(0) rotateY(0) translateZ(0)';
+      });
+    });
+
+    document.querySelectorAll('.tilt-photo').forEach(function(frame){
+      var photo = frame.querySelector('.hero-photo');
+      frame.addEventListener('mousemove', function(e){
+        var rect = frame.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width;
+        var py = (e.clientY - rect.top) / rect.height;
+        var rx = (py - 0.5) * -14;
+        var ry = (px - 0.5) * 16;
+        photo.style.transform = 'perspective(500px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
+      });
+      frame.addEventListener('mouseleave', function(){
+        photo.style.transform = 'perspective(500px) rotateX(0) rotateY(0)';
+      });
+    });
+  }
+  /* On touch devices the tilt listeners are skipped entirely so nothing fires on
+     scroll/tap — the ring-spin animation (pure CSS) still runs, so the photo
+     and every 3D element stays visible and animated on phones without relying
+     on a mouse. */
+
+  /* ---------- Hero particle system: welding sparks -> circuit nodes ---------- */
+  var canvas = document.getElementById('spark-canvas');
+  var ctx = canvas.getContext('2d');
+  var hero = document.getElementById('hero');
+  var W, H, DPR;
+
+  function resize(){
+    var capDPR = (hero.offsetWidth < 700) ? 1.5 : 2;
+    DPR = Math.min(window.devicePixelRatio || 1, capDPR);
+    W = hero.offsetWidth;
+    H = hero.offsetHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var isSmallScreen = W < 700;
+  var particles = [];
+  var MAX_NODES = isSmallScreen ? 32 : 70;
+  var CONNECT_DIST = isSmallScreen ? 100 : 140;
+
+  function spawnSpark(x, y){
+    var angle = -Math.PI/2 + (Math.random() - 0.5) * 1.6;
+    var speed = 1.4 + Math.random() * 2.6;
+    particles.push({
+      type:'spark',
+      x:x, y:y,
+      vx:Math.cos(angle)*speed,
+      vy:Math.sin(angle)*speed,
+      life:0,
+      maxLife: 40 + Math.random()*40,
+      size: 1.2 + Math.random()*1.6
+    });
+  }
+
+  function spawnNode(x,y){
+    var nodeCount = particles.filter(function(p){return p.type==='node';}).length;
+    if(nodeCount >= MAX_NODES) return;
+    particles.push({
+      type:'node',
+      x:x, y:y,
+      vx:(Math.random()-0.5)*0.15,
+      vy:(Math.random()-0.5)*0.15,
+      life:0,
+      maxLife: 700 + Math.random()*500,
+      size: 1.6 + Math.random()*1.2
+    });
+  }
+
+  // seed some ambient nodes so the circuit constellation is present immediately
+  for(var i=0;i<(isSmallScreen ? 14 : 28);i++){
+    spawnNode(Math.random()*W, Math.random()*H);
+  }
+
+  var torchX = W * 0.5, torchY = H * 0.72;
+  var usingMouse = false;
+  var mouseTimeout;
+
+  hero.addEventListener('mousemove', function(e){
+    var r = hero.getBoundingClientRect();
+    torchX = e.clientX - r.left;
+    torchY = e.clientY - r.top;
+    usingMouse = true;
+    clearTimeout(mouseTimeout);
+    mouseTimeout = setTimeout(function(){ usingMouse = false; }, 1800);
+  });
+
+  var frame = 0;
+  var spawnRate = reduceMotion ? 0 : (isSmallScreen ? 1 : 2);
+
+  function tick(){
+    frame++;
+    ctx.clearRect(0,0,W,H);
+
+    // ambient torch position drifts slowly when idle
+    if(!usingMouse){
+      torchX = W*0.5 + Math.sin(frame*0.004)*W*0.22;
+      torchY = H*0.68 + Math.cos(frame*0.006)*H*0.06;
+    }
+
+    if(spawnRate > 0 && frame % 2 === 0){
+      for(var s=0;s<spawnRate;s++){
+        spawnSpark(torchX + (Math.random()-0.5)*10, torchY);
+      }
+    }
+
+    // update
+    for(var i=particles.length-1;i>=0;i--){
+      var p = particles[i];
+      p.life++;
+      p.x += p.vx;
+      p.y += p.vy;
+      if(p.type==='spark'){
+        p.vy += 0.045; // gravity
+        p.vx *= 0.99;
+        if(p.life >= p.maxLife){
+          spawnNode(p.x, p.y);
+          particles.splice(i,1);
+          continue;
+        }
+      } else {
+        if(p.life >= p.maxLife || p.x < -20 || p.x > W+20 || p.y < -20 || p.y > H+20){
+          particles.splice(i,1);
+          continue;
+        }
+      }
+    }
+
+    // draw connections between nearby nodes
+    var nodes = particles.filter(function(p){return p.type==='node';});
+    for(var a=0;a<nodes.length;a++){
+      for(var b=a+1;b<nodes.length;b++){
+        var dx = nodes[a].x - nodes[b].x;
+        var dy = nodes[a].y - nodes[b].y;
+        var dist = Math.sqrt(dx*dx+dy*dy);
+        if(dist < CONNECT_DIST){
+          var op = (1 - dist/CONNECT_DIST) * 0.35;
+          ctx.strokeStyle = 'rgba(45,227,255,' + op + ')';
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.moveTo(nodes[a].x, nodes[a].y);
+          ctx.lineTo(nodes[b].x, nodes[b].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // draw particles
+    particles.forEach(function(p){
+      if(p.type==='spark'){
+        var t = p.life / p.maxLife;
+        var alpha = 1 - t;
+        ctx.fillStyle = 'rgba(255,' + Math.round(150 - t*60) + ',' + Math.round(40 + t*20) + ',' + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * (1-t*0.4), 0, Math.PI*2);
+        ctx.fill();
+      } else {
+        var fadeT = p.life / p.maxLife;
+        var alpha2 = fadeT < 0.1 ? fadeT/0.1 : (fadeT > 0.85 ? (1-fadeT)/0.15 : 1);
+        ctx.fillStyle = 'rgba(45,227,255,' + (0.85*alpha2) + ')';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(45,227,255,' + (0.25*alpha2) + ')';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size+2.5, 0, Math.PI*2);
+        ctx.stroke();
+      }
+    });
+
+    requestAnimationFrame(tick);
+  }
+
+  if(!reduceMotion){
+    requestAnimationFrame(tick);
+  } else {
+    // static single frame with just nodes for reduced motion
+    nodes = particles;
+    ctx.clearRect(0,0,W,H);
+    particles.forEach(function(p){
+      ctx.fillStyle = 'rgba(45,227,255,0.6)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fill();
+    });
+  }
+})();
+</script>
+</body>
 </html>
